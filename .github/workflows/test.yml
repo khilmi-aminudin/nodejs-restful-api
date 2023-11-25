@@ -1,0 +1,42 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: nodejs_restful_api_db
+        ports:
+          - 3306:3306
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+          
+    - name: Install dependencies
+      run: make install
+
+    - name: Copy Env
+      run: cp example.env .env
+
+    - name: Run Database Migration
+      run: make 
+
+    - name: Run Unit Test
+      run: make test
