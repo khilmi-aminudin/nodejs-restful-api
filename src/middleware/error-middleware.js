@@ -12,7 +12,7 @@ export const errorMiddleware = async (err, req, res, next) => {
             errors : err.message
         }).end()
     } else {
-        res.status(httpConst.STATUS_IINTERNAL_SERVER_ERROR).json({
+        res.status(httpConst.STATUS_INTERNAL_SERVER_ERROR).json({
             errors : err.message
         }).end()
     } 
