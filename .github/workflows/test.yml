@@ -36,7 +36,7 @@ jobs:
       run: cp example.env .env
 
     - name: Run Database Migration
-      run: make 
+      run: make db-migrate
 
     - name: Run Unit Test
       run: make test
