@@ -9,4 +9,4 @@ test:
 run:
 	node src/main.js
 
-.PHONY: test, run, test, install
+.PHONY: test

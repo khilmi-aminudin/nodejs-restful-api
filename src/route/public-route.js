@@ -13,6 +13,7 @@ publicRouter.get('/health', (req, res) => {
 
 // public user api
 publicRouter.post('/api/users', userController.register)
+publicRouter.post('/api/users/login', userController.login)
 
 export {
     publicRouter
