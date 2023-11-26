@@ -1,5 +1,5 @@
 import { ResponseError } from "../error/response-error.js"
-import httpConst from "../../constant/constant-http.js"
+import constant from "../../constant/constant.js"
 
 export const errorMiddleware = async (err, req, res, next) => {
     if (!err) {
@@ -12,7 +12,7 @@ export const errorMiddleware = async (err, req, res, next) => {
             errors : err.message
         }).end()
     } else {
-        res.status(httpConst.STATUS_INTERNAL_SERVER_ERROR).json({
+        res.status(constant.HttpStatusInternalServerError).json({
             errors : err.message
         }).end()
     } 

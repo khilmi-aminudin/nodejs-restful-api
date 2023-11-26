@@ -1,8 +1,8 @@
 import { prismaClient } from "../application/database.js"
 import { ResponseError } from "../error/response-error.js"
-import { loginUserValidation, registerUserValidation } from "../validation/user-validation.js"
+import { getUserValidation, loginUserValidation, registerUserValidation } from "../validation/user-validation.js"
 import { validate } from "../validation/validation.js"
-import httpConst from "../../constant/constant-http.js"
+import constant from "../../constant/constant.js"
 import bcrypt from "bcrypt"
 import {v4 as uuid} from "uuid"
 
@@ -16,7 +16,7 @@ const register = async (request) => {
     })
 
     if (countUser === 1) {
-        throw new ResponseError(httpConst.STATUS_BAD_REQUEST, 'username already exists')
+        throw new ResponseError(constant.HttpStatusBadRequest, 'username already exists')
     }
 
     user.password = await bcrypt.hash(user.password, 10)
@@ -44,13 +44,13 @@ const login = async (request) => {
     })
 
     if (!user) {
-        throw new ResponseError(httpConst.STATUS_UNAUTHORIZED, 'username or password wrong')
+        throw new ResponseError(constant.HttpStatusUnAuthorized, 'username or password wrong')
     }
 
     const isValidPassword = await bcrypt.compare(loginRequest.password, user.password)
     
     if (!isValidPassword) {
-        throw new ResponseError(httpConst.STATUS_UNAUTHORIZED, 'username or password wrong')
+        throw new ResponseError(constant.HttpStatusUnAuthorized, 'username or password wrong')
     }
 
     const token = uuid().toString()
@@ -68,8 +68,28 @@ const login = async (request) => {
     })
 }
 
+const get = async (username) => {
+    username = validate(getUserValidation, username)
+
+    const user = await prismaClient.user.findUnique({
+        where: {
+            username: username
+        },
+        select: {
+            username: true,
+            name: true
+        }
+    })
+
+    if (!user) {
+        throw new ResponseError(constant.HttpStatusNotFound, `user not found`)
+    }
+
+    return user
+}
 
 export default {
     register,
-    login
+    login,
+    get
 }

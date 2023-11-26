@@ -1,12 +1,12 @@
 import express from 'express'
 import userController from "../controller/user-controller.js"
-import httpConst from "../../constant/constant-http.js"
+import constant from "../../constant/constant.js"
 
 const publicRouter = new express.Router()
 
 // healthcheck api
 publicRouter.get('/health', (req, res) => {
-    res.status(httpConst.STATUS_OK).json({
+    res.status(constant.HttpStatusOk).json({
         "message" : "hello, i am okay!",
     })
 })

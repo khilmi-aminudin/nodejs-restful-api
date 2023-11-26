@@ -1,8 +1,8 @@
 import supertest from "supertest"
 import { web } from "../src/application/web.js"
-import httpConst from "../constant/constant-http.js"
-import constantHttp from "../constant/constant-http.js"
+import constant from "../constant/constant.js"
 import { createTestUserData, removeTestUserData } from "./user.util.js"
+import { logger } from "../src/application/logging.js"
 
 const [username, password, name, token] = ['test', 'rahasia', 'test user', 'token']
 
@@ -20,13 +20,13 @@ describe('POST /api/users', function() {
             name : name
         })
 
-        expect(result.status).toBe(httpConst.STATUS_OK)
+        expect(result.status).toBe(constant.HttpStatusOk)
         expect(result.body.data.username).toBe(username)
         expect(result.body.data.name).toBe(name)
         expect(result.body.data.password).toBeUndefined()
     })
 
-    it('it should rejected if request invalid', async () => {
+    it('it should be rejected if request invalid', async () => {
         const result = await supertest(web)
         .post('/api/users')
         .send({
@@ -36,12 +36,12 @@ describe('POST /api/users', function() {
         })
 
         // logger.info(result.body)
-        expect(result.status).toBe(httpConst.STATUS_BAD_REQUEST)
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
 
 
-    it('it should be rejected because user already registered', async () => {
+    it('it should be rejected if user already registered', async () => {
         let result = await supertest(web)
         .post('/api/users')
         .send({
@@ -50,7 +50,7 @@ describe('POST /api/users', function() {
             name : name
         })
 
-        expect(result.status).toBe(httpConst.STATUS_OK)
+        expect(result.status).toBe(constant.HttpStatusOk)
         expect(result.body.data.username).toBe(username)
         expect(result.body.data.name).toBe(name)
         expect(result.body.data.password).toBeUndefined()
@@ -63,7 +63,7 @@ describe('POST /api/users', function() {
             name : name
         })
 
-        expect(result.status).toBe(constantHttp.STATUS_BAD_REQUEST)
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
 })
@@ -90,7 +90,7 @@ describe('POST /api/users/login', function() {
             password: password
         })
 
-        expect(result.status).toBe(httpConst.STATUS_OK)
+        expect(result.status).toBe(constant.HttpStatusOk)
         expect(result.body.data.token).toBeDefined()
         expect(result.body.data.token).not.toBe(token)
     })
@@ -103,7 +103,7 @@ describe('POST /api/users/login', function() {
             password: ''
         })
 
-        expect(result.status).toBe(httpConst.STATUS_BAD_REQUEST)
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
 
@@ -116,7 +116,7 @@ describe('POST /api/users/login', function() {
             password: password
         })
 
-        expect(result.status).toBe(httpConst.STATUS_BAD_REQUEST)
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
 
@@ -129,8 +129,46 @@ describe('POST /api/users/login', function() {
             password: ''
         })
 
-        expect(result.status).toBe(httpConst.STATUS_BAD_REQUEST)
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
 
+})
+
+describe('GET /api/users/current', function() {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+    })
+
+    afterEach(async () => {
+        await removeTestUserData(username)
+    })
+
+    it('should can get current user', async () => {
+        const result = await supertest(web)
+            .get("/api/users/current")
+            .set(constant.RequestAthorizationKey, token)
+
+            logger.info(result)
+        
+            expect(result.status).toBe(constant.HttpStatusOk)
+            expect(result.body.data.username).toBe(username)
+            expect(result.body.data.name).toBe(name)
+    })
+
+    it('should be reject if token is invalid', async () => {
+        const result = await supertest(web)
+            .get("/api/users/current")
+            .set(constant.RequestAthorizationKey, "salah")
+
+            logger.info(result)
+        
+            expect(result.status).toBe(constant.HttpStatusUnAuthorized)
+            expect(result.body.errors).toBeDefined()
+    })
 })
