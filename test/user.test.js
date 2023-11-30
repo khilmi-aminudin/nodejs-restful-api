@@ -246,3 +246,40 @@ describe('PATCH /api/users/current', function () {
         expect(result.status).toBe(constant.HttpStatusUnAuthorized)
     })
 })
+
+describe('DELETE /api/users/logout', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+    })
+
+    afterEach(async () => {
+        await removeTestUserData(username)
+    })
+
+
+    it('should can logout', async ()=> {
+        const result = await supertest(web)
+                .delete('/api/users/logout')
+                .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data).toBe("ok")
+
+        const user = await getTestUser(username)
+        expect(user.token).toBeNull()
+    })
+
+
+    it('should reject logout invalid token', async ()=> {
+        const result = await supertest(web)
+                .delete('/api/users/logout')
+                .set(constant.RequestAthorizationKey, "tokensalah")
+        
+        expect(result.status).toBe(constant.HttpStatusUnAuthorized)
+    })
+})
