@@ -1,8 +1,9 @@
 import supertest from "supertest"
 import { web } from "../src/application/web.js"
 import constant from "../constant/constant.js"
-import { createTestUserData, removeTestUserData } from "./user.util.js"
+import { createTestUserData, getTestUser, removeTestUserData } from "./user.util.js"
 import { logger } from "../src/application/logging.js"
+import bcrypt from "bcrypt"
 
 const [username, password, name, token] = ['test', 'rahasia', 'test user', 'token']
 
@@ -154,8 +155,6 @@ describe('GET /api/users/current', function() {
             .get("/api/users/current")
             .set(constant.RequestAthorizationKey, token)
 
-            logger.info(result)
-        
             expect(result.status).toBe(constant.HttpStatusOk)
             expect(result.body.data.username).toBe(username)
             expect(result.body.data.name).toBe(name)
@@ -170,5 +169,117 @@ describe('GET /api/users/current', function() {
         
             expect(result.status).toBe(constant.HttpStatusUnAuthorized)
             expect(result.body.errors).toBeDefined()
+    })
+})
+
+describe('PATCH /api/users/current', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+    })
+
+    afterEach(async () => {
+        await removeTestUserData(username)
+    })
+
+    it('it should can update user', async () => {
+        const [newName, newPassword] = ['new name', 'new password']
+        const result = await supertest(web)
+                .patch('/api/users/current')
+                .set(constant.RequestAthorizationKey, token)
+                .send({
+                    name: newName,
+                    password: newPassword
+                })
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.name).toBe(newName)
+
+        const user = await getTestUser(username)
+        var isValidPassword = await bcrypt.compare(newPassword, user.password)
+        expect(isValidPassword).toBe(true)
+    })
+
+
+    it('it should can update user name', async () => {
+        const [newName, newPassword] = ['new name', 'new password']
+        const result = await supertest(web)
+                .patch('/api/users/current')
+                .set(constant.RequestAthorizationKey, token)
+                .send({
+                    name: newName
+                })
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.name).toBe(newName)
+    })
+
+
+    it('it should can update user password', async () => {
+        const [newName, newPassword] = ['new name', 'new password']
+        const result = await supertest(web)
+                .patch('/api/users/current')
+                .set(constant.RequestAthorizationKey, token)
+                .send({
+                    password: newPassword
+                })
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        const user = await getTestUser(username)
+        var isValidPassword = await bcrypt.compare(newPassword, user.password)
+        expect(isValidPassword).toBe(true)
+    })
+
+    it('it should reject update user invalid request', async () => {
+        const [newName, newPassword] = ['new name', 'new password']
+        const result = await supertest(web)
+                .patch('/api/users/current')
+                .set(constant.RequestAthorizationKey, "tokensalah")
+                .send({
+                    password: newPassword
+                })
+
+        expect(result.status).toBe(constant.HttpStatusUnAuthorized)
+    })
+})
+
+describe('DELETE /api/users/logout', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+    })
+
+    afterEach(async () => {
+        await removeTestUserData(username)
+    })
+
+
+    it('should can logout', async ()=> {
+        const result = await supertest(web)
+                .delete('/api/users/logout')
+                .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data).toBe("ok")
+
+        const user = await getTestUser(username)
+        expect(user.token).toBeNull()
+    })
+
+
+    it('should reject logout invalid token', async ()=> {
+        const result = await supertest(web)
+                .delete('/api/users/logout')
+                .set(constant.RequestAthorizationKey, "tokensalah")
+        
+        expect(result.status).toBe(constant.HttpStatusUnAuthorized)
     })
 })
