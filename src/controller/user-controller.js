@@ -4,7 +4,7 @@ import constant from "../../constant/constant.js"
 const register = async (req, res, next) => {
     try {
         const result =  await userService.register(req.body)
-        res.status(constant.HttpStatusOk).json({
+        res.status(constant.HttpStatusCreated).json({
             data: result
         })   
     } catch (e) {

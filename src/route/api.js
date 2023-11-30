@@ -1,17 +1,21 @@
 import express from 'express'
 import userController from "../controller/user-controller.js"
+import contactController from '../controller/contact-controller.js'
 import { authMiddleware } from '../middleware/auth-middleware.js'
 
-const userRouter = new express.Router()
+const authRouter = new express.Router()
 
 // use auth middleware
-userRouter.use(authMiddleware)
+authRouter.use(authMiddleware)
 
 // user api
-userRouter.get('/api/users/current', userController.get)
-userRouter.patch('/api/users/current', userController.update)
-userRouter.delete('/api/users/logout', userController.logout)
+authRouter.get('/api/users/current', userController.get)
+authRouter.patch('/api/users/current', userController.update)
+authRouter.delete('/api/users/logout', userController.logout)
+
+// contact api
+authRouter.post('/api/contacts', contactController.create)
 
 export {
-    userRouter
+    authRouter
 }
