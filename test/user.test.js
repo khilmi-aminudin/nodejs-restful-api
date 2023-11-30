@@ -1,7 +1,7 @@
 import supertest from "supertest"
 import { web } from "../src/application/web.js"
 import constant from "../constant/constant.js"
-import { createTestUserData, getTestUser, removeTestUserData } from "./user.util.js"
+import { createTestUserData, getTestUser, removeTestUser } from "./test.utils.js"
 import { logger } from "../src/application/logging.js"
 import bcrypt from "bcrypt"
 
@@ -9,7 +9,7 @@ const [username, password, name, token] = ['test', 'rahasia', 'test user', 'toke
 
 describe('POST /api/users', function() {
     afterEach( async () => {
-        await removeTestUserData(username)
+        await removeTestUser(username)
     })
 
     it('it should can register new user', async () => {
@@ -21,7 +21,7 @@ describe('POST /api/users', function() {
             name : name
         })
 
-        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.status).toBe(constant.HttpStatusCreated)
         expect(result.body.data.username).toBe(username)
         expect(result.body.data.name).toBe(name)
         expect(result.body.data.password).toBeUndefined()
@@ -36,7 +36,6 @@ describe('POST /api/users', function() {
             name : ''
         })
 
-        // logger.info(result.body)
         expect(result.status).toBe(constant.HttpStatusBadRequest)
         expect(result.body.errors).toBeDefined()
     })
@@ -51,7 +50,7 @@ describe('POST /api/users', function() {
             name : name
         })
 
-        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.status).toBe(constant.HttpStatusCreated)
         expect(result.body.data.username).toBe(username)
         expect(result.body.data.name).toBe(name)
         expect(result.body.data.password).toBeUndefined()
@@ -80,7 +79,7 @@ describe('POST /api/users/login', function() {
     })
 
     afterEach(async () => {
-        await removeTestUserData(username)
+        await removeTestUser(username)
     })
 
     it('should can login', async () => {
@@ -147,7 +146,7 @@ describe('GET /api/users/current', function() {
     })
 
     afterEach(async () => {
-        await removeTestUserData(username)
+        await removeTestUser(username)
     })
 
     it('should can get current user', async () => {
@@ -183,7 +182,7 @@ describe('PATCH /api/users/current', function () {
     })
 
     afterEach(async () => {
-        await removeTestUserData(username)
+        await removeTestUser(username)
     })
 
     it('it should can update user', async () => {
@@ -258,7 +257,7 @@ describe('DELETE /api/users/logout', function () {
     })
 
     afterEach(async () => {
-        await removeTestUserData(username)
+        await removeTestUser(username)
     })
 
 

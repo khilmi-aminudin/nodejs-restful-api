@@ -1,6 +1,7 @@
 
 const [
     HttpStatusOk,
+    HttpStatusCreated,
     
     HttpStatusBadRequest,
     HttpStatusUnAuthorized,
@@ -9,6 +10,7 @@ const [
     HttpStatusInternalServerError
 ] = [
     200, //HttpStatusOk
+    201, //HttpStatusCreated
     
     400, //HttpStatusBadRequest
     401, //HttpStatusUnAuthorized
@@ -25,6 +27,7 @@ const [
 
 export default {
     HttpStatusOk,
+    HttpStatusCreated,
     HttpStatusBadRequest,
     HttpStatusInternalServerError,
     HttpStatusUnAuthorized,
