@@ -18,6 +18,7 @@ authRouter.post('/api/contacts', contactController.create)
 authRouter.get('/api/contacts/:contactId', contactController.get)
 authRouter.put('/api/contacts/:contactId', contactController.update)
 authRouter.delete('/api/contacts/:contactId', contactController.remove)
+authRouter.get('/api/contacts', contactController.search)
 
 export {
     authRouter

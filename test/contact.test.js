@@ -1,7 +1,7 @@
 import supertest from "supertest"
 import {web} from "../src/application/web.js"
 import constant from "../constant/constant.js"
-import {removeTestUser, removeAllTestContacts, createTestUserData, createTestContact, getTestContact} from "./test.utils.js"
+import {removeTestUser, removeAllTestContacts, createTestUserData, createTestContact, getTestContact, createManyTestContact} from "./test.utils.js"
 
 const [username, password, name, token] = ['test', 'rahasia', 'test user', 'token']
 const [firstName, lastName, email, phone] = ["Jhon", "Doe", "jhon@gmail.com", "082312345678"]
@@ -230,5 +230,93 @@ describe('DELETE /api/contacts/:contactId', function () {
 
             
         expect(result.status).toBe(constant.HttpStatusNotFound)
+    })
+})
+
+describe('GET /api/contacts', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+
+        await createManyTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    it('should can search without parameters', async () => {
+        const result = await supertest(web)
+                .get(`/api/contacts`)
+                .set(constant.RequestAthorizationKey, token)
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(10)
+        expect(result.body.paging.page).toBe(1)
+        expect(result.body.paging.total_page).toBe(2)
+        expect(result.body.paging.total_item).toBe(15)
+    })
+
+    it('should can search page 2', async () => {
+        const result = await supertest(web)
+                .get(`/api/contacts`)
+                .query({ page: 2 })
+                .set(constant.RequestAthorizationKey, token)
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(5)
+        expect(result.body.paging.page).toBe(2)
+        expect(result.body.paging.total_page).toBe(2)
+        expect(result.body.paging.total_item).toBe(15)
+    })
+
+    it('should can search using name', async () => {
+        const result = await supertest(web)
+                .get(`/api/contacts`)
+                .query({ name: `${firstName} 1` })
+                .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(6)
+        expect(result.body.paging.page).toBe(1)
+        expect(result.body.paging.total_page).toBe(1)
+        expect(result.body.paging.total_item).toBe(6)
+    })
+
+    it('should can search using email', async () => {
+        const result = await supertest(web)
+                .get(`/api/contacts`)
+                .query({ email: `1jhon` })
+                .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(2)
+        expect(result.body.paging.page).toBe(1)
+        expect(result.body.paging.total_page).toBe(1)
+        expect(result.body.paging.total_item).toBe(6)
+    })
+
+    it('should can search using phone', async () => {
+        const result = await supertest(web)
+                .get(`/api/contacts`)
+                .query({ phone: `${phone}1` })
+                .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(6)
+        expect(result.body.paging.page).toBe(1)
+        expect(result.body.paging.total_page).toBe(1)
+        expect(result.body.paging.total_item).toBe(6)
     })
 })
