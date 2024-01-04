@@ -183,3 +183,52 @@ describe('GET /api/contacts/:contactId', function () {
         expect(result.status).toBe(constant.HttpStatusNotFound)
     })
 })
+
+describe('DELETE /api/contacts/:contactId', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+        await createTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    it('should can be delete existing contact', async () => {
+        const testContact = await getTestContact(username)
+        
+        const result = await supertest(web)
+            .delete(`/api/contacts/${testContact.id}`)
+            .set(constant.RequestAthorizationKey, token)
+    
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data).toBe("OK")
+
+        const newTestContact = await getTestContact(username)
+        expect(newTestContact).toBeNull()
+    })
+
+    it('should be rejected contact not found', async () => {
+        const testContact = await getTestContact(username)
+
+        testContact.id += 2
+        const result = await supertest(web)
+            .delete(`/api/contacts/${testContact.id}`)
+            .set(constant.RequestAthorizationKey, token)
+
+            
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+    })
+})
