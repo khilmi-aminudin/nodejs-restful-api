@@ -103,3 +103,83 @@ describe('GET /api/contacts/:contactId', function () {
         expect(result.status).toBe(constant.HttpStatusNotFound)
     })
 })
+
+describe('GET /api/contacts/:contactId', function () {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+        await createTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    const [newFirstName, newLastName, newEmail, newPhone] = ["first name", "last name", "test@mail.com", "6200011100"]
+
+    it('should can be update existing contact', async () => {
+        const testContact = await getTestContact(username)
+
+        
+        const result = await supertest(web)
+            .put(`/api/contacts/${testContact.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                first_name : newFirstName,
+                last_name : newLastName,
+                email : newEmail,
+                phone : newPhone
+            })
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.id).toBe(testContact.id)
+        expect(result.body.data.first_name).toBe(newFirstName)
+        expect(result.body.data.last_name).toBe(newLastName)
+        expect(result.body.data.email).toBe(newEmail)
+        expect(result.body.data.phone).toBe(newPhone)
+    })
+
+    it('should reject if request is invalid', async () => {
+        const testContact = await getTestContact(username)
+
+        const result = await supertest(web)
+            .put(`/api/contacts/${testContact.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                first_name : "",
+                last_name : "",
+                email : "",
+                phone : ""
+            })
+            
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
+    })
+
+    it('should be rejected contact not found', async () => {
+        const testContact = await getTestContact(username)
+
+        testContact.id += 2
+        const result = await supertest(web)
+            .put(`/api/contacts/${testContact.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                first_name : newFirstName,
+                last_name : newLastName,
+                email : newEmail,
+                phone : newPhone
+            })
+            
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+    })
+})
