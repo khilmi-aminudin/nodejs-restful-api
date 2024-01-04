@@ -15,6 +15,7 @@ authRouter.delete('/api/users/logout', userController.logout)
 
 // contact api
 authRouter.post('/api/contacts', contactController.create)
+authRouter.get('/api/contacts/:contactId', contactController.get)
 
 export {
     authRouter
