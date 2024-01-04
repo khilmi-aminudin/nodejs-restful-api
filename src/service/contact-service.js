@@ -1,6 +1,7 @@
+import { request } from "express"
 import { prismaClient } from "../application/database.js"
 import { ResponseError } from "../error/response-error.js"
-import { createContactValidation, getContactValidation } from "../validation/contact-validation.js"
+import { createContactValidation, getContactValidation, searchContactsValidation, updateContactValidation } from "../validation/contact-validation.js"
 import { validate } from "../validation/validation.js"
 
 const create = async (user, request) => {
@@ -43,7 +44,133 @@ const get = async (user, contactId) => {
     return contact
 }
 
+const update = async (user, request) => {
+    const contact = validate(updateContactValidation, request)
+    
+    const totalContactInDatabase = await prismaClient.contact.count({
+        where: {
+            username: user.username,
+            id: contact.id
+        }
+    })
+
+    if (totalContactInDatabase !== 1) {
+        throw new ResponseError(404, "contact not found")
+    }
+
+    return prismaClient.contact.update({
+        where: {
+            id: contact.id
+        },
+        data: {
+            first_name: contact.first_name,
+            last_name: contact.last_name,
+            email: contact.email,
+            phone: contact.phone
+        },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            phone: true
+        }
+    })
+}
+
+const remove = async (user, contactId) => {
+    contactId = validate(getContactValidation, contactId)
+
+    const totalContactInDatabase = await prismaClient.contact.count({
+        where: {
+            username: user.username,
+            id: contactId
+        }
+    })
+
+    if (totalContactInDatabase !== 1) {
+        throw new ResponseError(404, "contact not found")
+    }
+
+    return prismaClient.contact.delete({
+        where: {
+            id: contactId
+        }
+    })
+}
+
+const search = async (user, request) => {
+    request = validate(searchContactsValidation, request)
+    
+    const skip = (request.page - 1) * request.size
+
+    const filters = [
+        { 
+            username: user.username 
+        }
+    ]
+
+    if (request.name){
+        filters.push(               {
+            OR: [
+                {
+                    first_name: {
+                        contains: request.name
+                    }
+                },
+                {
+                    last_name: {
+                        contains: request.name
+                    }
+                }
+            ]
+        })
+    }
+
+    if (request.email){
+        filters.push(                {
+            email: {
+                contains: request.email
+            }
+        })
+    }
+
+    if (request.phone){
+        filters.push({
+            phone: {
+                contains: request.phone
+            }
+        })
+    }
+
+    const contacts = await prismaClient.contact.findMany({
+        where: {
+            AND: filters
+        },
+        take: request.size,
+        skip: skip
+    })
+
+    const totalItem = await prismaClient.contact.count({
+        where: {
+            AND: filters
+        }
+    })
+
+    return {
+        data: contacts,
+        paging: {
+            page: request.page,
+            total_page: Math.ceil(totalItem / request.size),
+            total_item: totalItem
+        }
+    }
+}
+
 export default{
     create,
-    get
+    get,
+    update,
+    remove,
+    search
 }
