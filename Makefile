@@ -1,10 +1,10 @@
 mysql:
 	docker run --name mysql-db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql
-run-db:
+runDb:
 	docker start mysql-db
 install:
 	npm install
-db-migrate:
+dbMigrate:
 	npx prisma migrate dev
 test:
 	npm test

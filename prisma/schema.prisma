@@ -34,7 +34,7 @@ model Contact{
 model Address{
   @@map("addresses")
   id            Int     @id @default(autoincrement())
-  street        String?  @db.VarChar(100)
+  street        String?  @db.VarChar(255)
   city          String? @db.VarChar(100)
   province      String? @db.VarChar(100)
   country       String @db.VarChar(100)
