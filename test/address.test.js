@@ -356,3 +356,66 @@ describe('DELETE /api/contacts/:contactId/addresses/:addressId', function() {
         expect(result.body.errors).toBeDefined()
     })
 })
+
+describe('GET /api/contacts/:contactId/addresses',function(){
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+        await createTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+        })
+
+        await createTestAddress({
+            username: username,
+            street: street,
+            city: city,
+            province: province,
+            country: country,
+            postal_code: postalCode
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestAddresses(username)
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    it('should can list address', async () => {
+        const contact =  await getTestContact(username)
+        const address =  await getTestAddress(username)
+
+        const result = await supertest(web)
+            .get(`/api/contacts/${contact.id}/addresses`)
+            .set(constant.RequestAthorizationKey, token)
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.length).toBe(1)
+        expect(result.body.data[0].id).toBe(address.id)
+        expect(result.body.data[0].street).toBe(address.street)
+        expect(result.body.data[0].city).toBe(address.city)
+        expect(result.body.data[0].province).toBe(address.province)
+        expect(result.body.data[0].country).toBe(address.country)
+        expect(result.body.data[0].postal_code).toBe(address.postal_code)
+    })
+
+
+    it('should reject if contact not found', async () => {
+        const contact =  await getTestContact(username)
+
+        const result = await supertest(web)
+            .get(`/api/contacts/${contact.id + 3}/addresses`)
+            .set(constant.RequestAthorizationKey, token)
+
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+        expect(result.body.errors).toBeDefined
+    })
+})

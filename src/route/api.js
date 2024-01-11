@@ -26,6 +26,7 @@ authRouter.post('/api/contacts/:contactId/addresses', addressController.create)
 authRouter.get('/api/contacts/:contactId/addresses/:addressId', addressController.get)
 authRouter.put('/api/contacts/:contactId/addresses/:addressId', addressController.update)
 authRouter.delete('/api/contacts/:contactId/addresses/:addressId', addressController.remove)
+authRouter.get('/api/contacts/:contactId/addresses/', addressController.list)
 
 export {
     authRouter
