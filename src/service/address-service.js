@@ -3,9 +3,9 @@ import { validate } from "../validation/validation.js"
 import { getContactValidation } from "../validation/contact-validation.js"
 import { ResponseError } from "../error/response-error.js"
 import constant from "../../constant/constant.js"
-import { createAddressValidation } from "../validation/address-validation.js"
+import { createAddressValidation, getAddressValidation } from "../validation/address-validation.js"
 
-const create = async (user, contactId, request) => {
+const checkContactMustExists = async (user, contactId) => {
     contactId = validate(getContactValidation, contactId)
 
     const totalContactsInDatabase = await prismaClient.contact.count({
@@ -19,6 +19,12 @@ const create = async (user, contactId, request) => {
         throw new ResponseError(constant.HttpStatusNotFound, 'contact not found')
     }
 
+    return contactId
+}
+
+const create = async (user, contactId, request) => {
+    contactId = await checkContactMustExists(user, contactId)
+
     const address = validate(createAddressValidation, request)
     address.contact_id = contactId
 
@@ -30,12 +36,39 @@ const create = async (user, contactId, request) => {
             city: true,
             province: true,
             country:true,
-            contact_id: true,
             postal_code: true
         }
     })
 }
 
+const get = async (user, contactId, addressId) => {
+    contactId = await checkContactMustExists(user, contactId)
+    addressId = validate(getAddressValidation, addressId)
+
+    const address = await prismaClient.address.findFirst({
+        where: {
+            id: addressId,
+            contact_id: contactId
+        },
+        select: {
+            id: true,
+            street: true,
+            city: true,
+            province: true,
+            country:true,
+            postal_code: true
+        }
+    })
+
+    if (!address) {
+        throw new ResponseError(constant.HttpStatusNotFound, "address not found")
+    }
+
+    return address
+
+}
+
 export default {
-    create
+    create,
+    get
 }
