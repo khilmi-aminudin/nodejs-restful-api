@@ -23,6 +23,7 @@ authRouter.get('/api/contacts', contactController.search)
 
 // Address API
 authRouter.post('/api/contacts/:contactId/addresses', addressController.create)
+authRouter.get('/api/contacts/:contactId/addresses/:addressId', addressController.get)
 
 export {
     authRouter

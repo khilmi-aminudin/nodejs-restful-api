@@ -7,3 +7,5 @@ export const createAddressValidation = Joi.object({
     country : Joi.string().max(100).required(),
     postal_code : Joi.string().max(100).required(),
 })
+
+export const getAddressValidation = Joi.number().positive().min(1).required()
