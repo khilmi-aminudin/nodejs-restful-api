@@ -1,4 +1,4 @@
-name: Makefile CI
+name: Test Build CI
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
       run: cp example.env .env
 
     - name: Run Database Migration
-      run: make db-migrate
+      run: make dbMigrate
 
     - name: Run Unit Test
       run: make test
