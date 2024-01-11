@@ -2,6 +2,7 @@ import supertest from "supertest"
 import { getTestContact, createTestContact, removeTestUser, removeAllTestContacts, removeAllTestAddresses, createTestUserData, createTestAddress, getTestAddress } from "./test.utils.js"
 import { web } from "../src/application/web.js"
 import constant from "../constant/constant.js"
+import { response } from "express"
 
 const [username, password, name, token] = ['test', 'rahasia', 'test user', 'token']
 const [firstName, lastName, email, phone] = ["Jhon", "Doe", "jhon@gmail.com", "082312345678"]
@@ -280,5 +281,78 @@ describe('PUT /api/contacts/:contactId/addresses', function() {
         expect(result.status).toBe(constant.HttpStatusNotFound)
         expect(result.body.errors).toBeDefined()
     })
+})
 
+describe('DELETE /api/contacts/:contactId/addresses/:addressId', function() {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+        await createTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+        })
+
+        await createTestAddress({
+            username: username,
+            street: street,
+            city: city,
+            province: province,
+            country: country,
+            postal_code: postalCode
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestAddresses(username)
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    it('should can remove address', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .delete(`/api/contacts/${contact.id}/addresses/${address.id}`)
+            .set(constant.RequestAthorizationKey, token)
+
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data).toBe("OK")
+
+        const newAddress = await getTestAddress(username)
+        expect(newAddress).toBeNull()
+    })
+
+    it('should rejected if contact not found', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .delete(`/api/contacts/${contact.id+5}/addresses/${address.id}`)
+            .set(constant.RequestAthorizationKey, token)
+
+        
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+        expect(result.body.errors).toBeDefined()
+    })
+
+
+    it('should rejected if address not found', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .delete(`/api/contacts/${contact.id}/addresses/${address.id+5}`)
+            .set(constant.RequestAthorizationKey, token)
+        
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+        expect(result.body.errors).toBeDefined()
+    })
 })
