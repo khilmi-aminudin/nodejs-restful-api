@@ -33,7 +33,27 @@ const get = async (req, res, next) => {
     }
 }
 
+const update = async (req, res, next) => {
+    try {
+        const user = req.user
+        const request = req.body
+        const contactId = req.params.contactId
+        const addressId = req.params.addressId
+        request.id = addressId
+
+        const result = await addressService.update(user, contactId, request)
+
+        res.status(constant.HttpStatusOk).json({
+            data: result
+        })
+    } catch (e) {
+        next(e)
+    }
+}
+
+
 export default {
     create,
-    get
+    get,
+    update
 }

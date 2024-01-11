@@ -165,3 +165,120 @@ describe('GET /api/contacts/:contactId/addresses/:addressId', function() {
         expect(result.body.errors).toBeDefined()
     })
 })
+
+describe('PUT /api/contacts/:contactId/addresses', function() {
+    beforeEach(async () => {
+        await createTestUserData({
+            username: username,
+            password: password,
+            name: name,
+            token: token
+        })
+        await createTestContact({
+            username: username,
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+        })
+
+        await createTestAddress({
+            username: username,
+            street: street,
+            city: city,
+            province: province,
+            country: country,
+            postal_code: postalCode
+        })
+    })
+
+    afterEach(async () => {
+        await removeAllTestAddresses(username)
+        await removeAllTestContacts(username)
+        await removeTestUser(username)
+    })
+
+    it('should can update address', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .put(`/api/contacts/${contact.id}/addresses/${address.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                street: "street",
+                city: "city",
+                province: "province",
+                country: "country",
+                postal_code: "postalCode"
+            })
+        
+        expect(result.status).toBe(constant.HttpStatusOk)
+        expect(result.body.data.id).toBe(address.id)
+        expect(result.body.data.street).toBe("street")
+        expect(result.body.data.city).toBe("city")
+        expect(result.body.data.province).toBe("province")
+        expect(result.body.data.country).toBe("country")
+        expect(result.body.data.postal_code).toBe("postalCode")
+    })
+
+    it('should rejected update address if request invalid', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .put(`/api/contacts/${contact.id}/addresses/${address.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                street: street,
+                city: city,
+                province: province,
+                country: country,
+                postal_code: 12345
+            })
+        
+        expect(result.status).toBe(constant.HttpStatusBadRequest)
+        expect(result.body.errors).toBeDefined()
+    })
+
+
+    it('should rejected if contact not found', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .put(`/api/contacts/${contact.id+5}/addresses/${address.id}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                street: street,
+                city: city,
+                province: province,
+                country: country,
+                postal_code: postalCode
+            })
+        
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+        expect(result.body.errors).toBeDefined()
+    })
+
+
+    it('should rejected if address not found', async () => {
+        const contact = await getTestContact(username)
+        const address = await getTestAddress(username)
+
+        const result = await supertest(web)
+            .put(`/api/contacts/${contact.id}/addresses/${address.id+5}`)
+            .set(constant.RequestAthorizationKey, token)
+            .send({
+                street: street,
+                city: city,
+                province: province,
+                country: country,
+                postal_code: postalCode
+            })
+        
+        expect(result.status).toBe(constant.HttpStatusNotFound)
+        expect(result.body.errors).toBeDefined()
+    })
+
+})
