@@ -53,7 +53,7 @@ const logout = async (req, res, next) => {
     try {
         await userService.logout(req.user.username)
         res.status(constant.HttpStatusOk).json({
-            data: "ok"
+            data: "OK"
         })
     } catch (e) {
         next(e)

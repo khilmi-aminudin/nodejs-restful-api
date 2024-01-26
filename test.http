@@ -1,0 +1,92 @@
+### Users Api Manual Test
+###
+POST http://localhost:3000/api/users
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username" : "khilmiaminudin",
+    "password" : "khilmi123/",
+    "name" : "khilmi aminudin"
+}
+
+###
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username" : "khilmiaminudin",
+    "password" : "khilmi123"
+}
+
+### token : 745d9b23-eee2-48de-86af-8344b590b7fd
+GET http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+### token : 745d9b23-eee2-48de-86af-8344b590b7fd
+PATCH http://localhost:3000/api/users/current
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+{
+    "name": "Khilmi Aminudin",
+    "password": "khilmi123"
+}
+
+### token : 745d9b23-eee2-48de-86af-8344b590b7fd
+DELETE http://localhost:3000/api/users/logout
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+
+
+### Contacts Api Manual Test
+###
+POST http://localhost:3000/api/contacts
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+{
+    "first_name": "Khilmi",
+    "last_name": "Aminudin",
+    "email": "khilmiaminudin@example.com",
+    "phone": "+6281234567890"
+}
+
+###
+GET http://localhost:3000/api/contacts
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+###
+GET http://localhost:3000/api/contacts/3
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+
+###
+PUT http://localhost:3000/api/contacts/2
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd
+
+{
+    "first_name": "Akeno",
+    "last_name": "Zahran Asadele",
+    "email": "akenoasadel@zahran.com",
+    "phone": "+6281234567890"
+}
+
+###
+DELETE http://localhost:3000/api/contacts/3
+Content-Type: application/json
+Accept: application/json
+Authorization: 745d9b23-eee2-48de-86af-8344b590b7fd

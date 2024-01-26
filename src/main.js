@@ -1,8 +1,8 @@
 import { web } from "./application/web.js"
 import { logger } from "./application/logging.js"
 
-
-web.listen(3000, () => {
-    logger.info("App is running on port 3000")
-    console.info("app is running on port 3000")
+const port = process.env.APP_PORT || 30001
+web.listen(port, () => {
+    logger.info(`app is running on port ${port}`)
+    console.info(`app is running on port ${port}`)
 })

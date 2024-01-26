@@ -267,7 +267,7 @@ describe('DELETE /api/users/logout', function () {
                 .set(constant.RequestAthorizationKey, token)
         
         expect(result.status).toBe(constant.HttpStatusOk)
-        expect(result.body.data).toBe("ok")
+        expect(result.body.data).toBe("OK")
 
         const user = await getTestUser(username)
         expect(user.token).toBeNull()
